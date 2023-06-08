@@ -10,37 +10,43 @@ API должен позволять выполнять CRUD операции
 с задачами.
 """
 import logging
-from typing import List
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-tasks = []
+tasks = [
+    {'title': 'Title1', 'description': 'Description 1', 'status': False},
+    {'title': 'Title2', 'description': 'Description 2', 'status': False},
+    {'title': 'Title3', 'description': 'Description 3', 'status': False},
+]
 
 app = FastAPI()
 
 
-class Task(BaseModel):
-    title: str = Field(max_length=32)
-    description: str = Field(max_length=200)
-    status: bool = Field(default=False)
-
-
-@app.get("/tasks/", response_model=List[Task])
+@app.get("/tasks/")
 async def read_tasks():
-    logger.info('Отработал GET запрос на чтение всего списка.')
-    return tasks
+    logger.info('Отработал GET запрос на чтение всего списка задач.')
+    return {'tasks': tasks}
 
 
-@app.get("/tasks/{task_id}", response_model=Task)
+def task_check(task_id):
+    return task_id < len(tasks)
+
+
+"""
+@app.get("/tasks/{task_id}")
 async def read_task(task_id: int):
-    logger.info(f'Отработал GET запрос. Содержимое tasks[]: {tasks}.')
-    return tasks[task_id]
+    if task_check(task_id):
+        logger.info(f'Отработал GET запрос на чтение одной задачи.')
+        return {'task': tasks[task_id]}
+    else:
+        return {'task': }
+"""
 
 
+"""
 @app.post('/tasks/', response_model=Task)
 async def create_task(task: Task):
     tasks.append(Task)
@@ -60,4 +66,4 @@ async def delete_task(task_id: int):
     remove_item = tasks.pop(task_id)
     logger.info(f'Отработал DELETE запрос. Содержимое tasks[]: {tasks}.')
     return remove_item
-
+"""
